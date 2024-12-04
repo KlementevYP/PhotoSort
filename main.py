@@ -198,99 +198,126 @@ class PhotoRatingApp:
         self.page.controls.clear()
 
         # Создаем Stack для абсолютного позиционирования
-        page_stack = Stack(
-            [
-                # Победитель - первый элемент в стеке
-                Container(
-                    content=Column(
-                        [
-                            Text("Победитель:", size=24, weight="bold"),
-                            GestureDetector(
-                                content=Image(
-                                    src=winners[0][0], 
-                                    width=300, 
-                                    height=300
-                                ),
-                                on_tap=lambda e: self.open_in_explorer(winners[0][0])
+        def update_layout(e):
+            # Пересоздаем Stack при каждом изменении размера
+            page_stack.controls.clear()
+            
+            # Победитель - первый элемент в стеке
+            winner_container = Container(
+                content=Column(
+                    [
+                        Text("Победитель:", size=24, weight="bold"),
+                        GestureDetector(
+                            content=Image(
+                                src=winners[0][0], 
+                                width=min(300, self.page.width * 0.7),  # Адаптивная ширина
+                                height=min(300, self.page.width * 0.7),  # Адаптивная высота
+                                fit="contain"
                             ),
-                            Text(f"{os.path.basename(winners[0][0])} - {winners[0][1]} баллов", size=18, weight="bold"),
-                        ],
-                        alignment="center",
-                        horizontal_alignment="center",
-                        spacing=10
-                    ),
-                    top=0,
-                    left=0,
-                    width=self.page.width,
-                    padding=10,
+                            on_tap=lambda e: self.open_in_explorer(winners[0][0])
+                        ),
+                        Text(f"{os.path.basename(winners[0][0])} - {winners[0][1]} баллов", size=18, weight="bold"),
+                    ],
+                    alignment="center",
+                    horizontal_alignment="center",
+                    spacing=10
                 ),
+                top=0,
+                left=0,
+                width=self.page.width,
+                padding=10,
+            )
 
-                # Список участников - второй элемент в стеке
-                Container(
-                    content=ListView(
-                        controls=[
-                            Card(
-                                content=Container(
-                                    content=Row(
-                                        [
-                                            Image(
-                                                src=image, 
-                                                width=80, 
-                                                height=80, 
-                                                fit="cover", 
-                                                border_radius=10
-                                            ),
-                                            Column(
-                                                [
-                                                    Text(f"{idx}-е место", size=18, weight="bold", color="blue"),
-                                                    Text(f"{os.path.basename(image)}", size=16, weight="bold", color="gray"),
-                                                    Text(f"{score} баллов", size=14, color="green"),
-                                                ],
-                                                alignment="start",
-                                                horizontal_alignment="start",
-                                                spacing=5,
-                                            ),
-                                        ],
-                                        alignment="start",
-                                        spacing=10,
-                                    ),
-                                    padding=10,
-                                    margin=10,
-                                    bgcolor="#2F3236",
-                                    border_radius=15,
+            # Список участников - второй элемент в стеке
+            participants_container = Container(
+                content=ListView(
+                    controls=[
+                        Card(
+                            content=Container(
+                                content=Row(
+                                    [
+                                        Image(
+                                            src=image, 
+                                            width=80, 
+                                            height=80, 
+                                            fit="cover", 
+                                            border_radius=10
+                                        ),
+                                        Column(
+                                            [
+                                                Text(f"{idx}-е место", size=18, weight="bold", color="blue"),
+                                                Text(f"{os.path.basename(image)}", size=16, weight="bold", color="gray"),
+                                                Text(f"{score} баллов", size=14, color="green"),
+                                            ],
+                                            alignment="start",
+                                            horizontal_alignment="start",
+                                            spacing=5,
+                                            width=self.page.width * 0.6  # Растягиваем на ширину
+                                        ),
+                                    ],
+                                    alignment="start",
+                                    spacing=10,
+                                    width=self.page.width * 0.9  # Почти на всю ширину
                                 ),
-                                elevation=3,
+                                padding=10,
                                 margin=10,
-                            ) for idx, (image, score) in enumerate(sorted_images[1:], start=2)
-                        ],
-                        spacing=10,
-                        expand=True,
-                    ),
-                    top=400,  # Отступ от верха для списка участников
-                    left=0,
-                    width=self.page.width,
-                    height=self.page.height - 450,
+                                bgcolor="#2F3236",
+                                border_radius=15,
+                                width=self.page.width * 0.9  # Почти на всю ширину
+                            ),
+                            elevation=3,
+                            margin=10,
+                            width=self.page.width * 0.9  # Почти на всю ширину
+                        ) for idx, (image, score) in enumerate(sorted_images[1:], start=2)
+                    ],
+                    spacing=10,
+                    expand=True,
                 ),
+                top=400,
+                left=self.page.width * 0.05,  # Центрируем
+                width=self.page.width * 0.9,  # Почти на всю ширину
+                height=self.page.height - 450,
+            )
 
-                # Кнопка возврата на начальный экран
-                Container(
-                    content=ElevatedButton(
-                        "Вернуться на начальную страницу", 
-                        on_click=lambda _: self.start_page(),
-                        width=self.page.width - 20,
-                        style=ButtonStyle(
-                            bgcolor="#4A4E69",
-                            color="white",
-                        )
-                    ),
-                    top=self.page.height - 50,  # Позиционирование внизу
-                    left=10,
-                    width=self.page.width - 20,
-                )
-            ],
+            # Кнопка возврата на начальный экран
+            return_button = Container(
+                content=ElevatedButton(
+                    "Вернуться на начальную страницу", 
+                    on_click=lambda _: self.start_page(),
+                    width=self.page.width * 0.9,  # Почти на всю ширину
+                    style=ButtonStyle(
+                        bgcolor="#4A4E69",
+                        color="white",
+                    )
+                ),
+                top=self.page.height - 50,  # Позиционирование внизу
+                left=self.page.width * 0.05,  # Центрируем
+                width=self.page.width * 0.9,  # Почти на всю ширину
+            )
+
+            # Добавляем элементы в Stack
+            page_stack.controls.extend([
+                winner_container, 
+                participants_container, 
+                return_button
+            ])
+            
+            # Обновляем страницу
+            self.page.update()
+
+        # Создаем Stack
+        page_stack = Stack(
+            controls=[],
             width=self.page.width,
-            height=self.page.height
+            height=self.page.height,
+            expand=True,
         )
+
+        # Добавляем обработчик изменения размера
+        self.page.on_resize = update_layout
+
+        # Первоначальное обновление макета
+        update_layout(None)
 
         # Добавляем Stack на страницу
         self.page.add(page_stack)
