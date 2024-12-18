@@ -141,6 +141,7 @@ class PhotoRatingApp:
                 alignment="center",
                 horizontal_alignment="center",
                 expand=True,
+                scroll="auto"
             )
         )
         self.page.update()
